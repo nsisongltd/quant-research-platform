@@ -5,6 +5,7 @@ import qualified Data.Csv as Csv
 import Data.Vector (Vector)
 import qualified Data.Vector as V
 import Data.Time (parseTimeM, defaultTimeLocale)
+import System.Environment (getArgs)
 
 data Trade = Trade
   { tradeId    :: !Int
@@ -39,10 +40,28 @@ validTimestamp ts =
 
 main :: IO ()
 main = do
-  csvData <- BL.readFile "trades.csv"
+  args <- getArgs
+  let filePath = case args of
+        [] -> "python/data/trades.csv"
+        [path] -> path
+        _ -> error "usage: validator [trades.csv]"
+  
+  csvData <- BL.readFile filePath
   case Csv.decodeByName csvData of
     Left err -> putStrLn ("csv parse error: " ++ err)
-    Right (_, v) -> V.forM_ v $ \trade ->
-      case validate trade of
-        [] -> return ()
-        errs -> putStrLn $ "trade " ++ show (tradeId trade) ++ ": " ++ unwords errs
+    Right (_, v) -> do
+      putStrLn $ "validating trades from: " ++ filePath
+      putStrLn "=" ++ replicate 50 '='
+      
+      let errors = V.toList $ V.concatMap (V.fromList . validate) v
+          totalTrades = V.length v
+      
+      putStrLn $ "total trades processed: " ++ show totalTrades
+      putStrLn $ "valid trades: " ++ show (totalTrades - length errors)
+      putStrLn $ "invalid trades: " ++ show (length errors)
+      
+      if null errors
+        then putStrLn "\nall trades are valid!"
+        else do
+          putStrLn "\nvalidation errors found:"
+          mapM_ (\err -> putStrLn $ "  " ++ err) errors
