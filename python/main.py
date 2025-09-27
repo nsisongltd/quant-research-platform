@@ -2,6 +2,9 @@ import csv
 import random
 from datetime import datetime, timedelta
 import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), 'strategies'))
+from sma_crossover import run_sma_strategy
 
 def generate_trade_data(num_trades=100, output_file="data/trades.csv"):
     symbols = ["AAPL", "TSLA", "MSFT", "BTC-USD"]
@@ -35,8 +38,15 @@ def main():
     print("quant research platform - python layer")
     print("=" * 50)
     
-    output_file = generate_trade_data()
-    print(f"trade data ready for haskell validation: {output_file}")
+    if len(sys.argv) > 1 and sys.argv[1] == "strategy":
+        print("running sma crossover strategy...")
+        strategy_file = run_sma_strategy()
+        if strategy_file:
+            print(f"strategy trades ready for haskell validation: {strategy_file}")
+    else:
+        print("generating random trade data...")
+        output_file = generate_trade_data()
+        print(f"trade data ready for haskell validation: {output_file}")
 
 if __name__ == "__main__":
     main()
