@@ -28,7 +28,7 @@ The project is a cross-language quant research system:
 ---
 
 ## Documentation
-- Check `docs/roadmap.md` to see log of what we've built each day.  
+- Check releases to see versions of what I've done
 - I would make sure to keep daily commits small and descriptive (since i have decided it'd be open source).  
 
 ---
