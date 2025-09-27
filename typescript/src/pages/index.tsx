@@ -1,7 +1,34 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
+import TradeChart from '../components/TradeChart';
+import PortfolioMetrics from '../components/PortfolioMetrics';
+import TradeTable from '../components/TradeTable';
+
+interface TradeData {
+  id: number;
+  symbol: string;
+  timestamp: string;
+  price: number;
+  quantity: number;
+  side: string;
+}
 
 const Home: React.FC = () => {
+  const [trades, setTrades] = useState<TradeData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/trades')
+      .then(res => res.json())
+      .then(data => {
+        setTrades(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
+  }, []);
+
   return (
     <div>
       <Head>
@@ -11,55 +38,52 @@ const Home: React.FC = () => {
       </Head>
 
       <main className="container mx-auto px-4 py-8">
-        <div className="text-center">
+        <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Quant Research Platform
           </h1>
-          <p className="text-xl text-gray-600 mb-8">
+          <p className="text-xl text-gray-600">
             Cross-language quant research and backtesting platform
           </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            <div className="bg-white p-6 rounded-lg shadow-md border">
-              <h2 className="text-2xl font-semibold text-blue-600 mb-2">Python</h2>
-              <p className="text-gray-600">Data & Strategy Layer</p>
-              <p className="text-sm text-gray-500 mt-2">
-                Generate data, run backtests, ML strategies
-              </p>
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow-md border">
-              <h2 className="text-2xl font-semibold text-purple-600 mb-2">Haskell</h2>
-              <p className="text-gray-600">Validation & Rules Layer</p>
-              <p className="text-sm text-gray-500 mt-2">
-                Enforce correctness, prevent invalid trades
-              </p>
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow-md border">
-              <h2 className="text-2xl font-semibold text-green-600 mb-2">TypeScript</h2>
-              <p className="text-gray-600">Dashboard & UI Layer</p>
-              <p className="text-sm text-gray-500 mt-2">
-                Visualize results, interactive charts
-              </p>
+        </div>
+
+        {loading ? (
+          <div className="text-center py-8">
+            <div className="text-lg text-gray-600">Loading trade data...</div>
+          </div>
+        ) : trades.length > 0 ? (
+          <div className="space-y-6">
+            <PortfolioMetrics trades={trades} />
+            <TradeChart trades={trades} />
+            <TradeTable trades={trades} />
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <div className="text-lg text-gray-600 mb-4">No trade data available</div>
+            <div className="text-sm text-gray-500">
+              Run the Python strategy to generate trade data
             </div>
           </div>
-          
-          <div className="mt-12 p-6 bg-gray-50 rounded-lg">
-            <h3 className="text-2xl font-semibold mb-4">Development Status</h3>
-            <div className="text-left max-w-2xl mx-auto">
-              <div className="flex items-center mb-2">
-                <span className="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
-                <span>Day 1: Trade data pipeline established</span>
-              </div>
-              <div className="flex items-center mb-2">
-                <span className="w-3 h-3 bg-yellow-500 rounded-full mr-3"></span>
-                <span>Day 2: Strategy simulation (planned)</span>
-              </div>
-              <div className="flex items-center">
-                <span className="w-3 h-3 bg-gray-300 rounded-full mr-3"></span>
-                <span>Day 3+: Dashboard visualization (planned)</span>
-              </div>
+        )}
+
+        <div className="mt-12 p-6 bg-gray-50 rounded-lg">
+          <h3 className="text-2xl font-semibold mb-4">Development Status</h3>
+          <div className="text-left max-w-2xl mx-auto">
+            <div className="flex items-center mb-2">
+              <span className="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+              <span>Day 1: Trade data pipeline established</span>
+            </div>
+            <div className="flex items-center mb-2">
+              <span className="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+              <span>Day 2: SMA crossover strategy implemented</span>
+            </div>
+            <div className="flex items-center mb-2">
+              <span className="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+              <span>Day 3: Risk management rules added</span>
+            </div>
+            <div className="flex items-center">
+              <span className="w-3 h-3 bg-yellow-500 rounded-full mr-3"></span>
+              <span>Day 4: Dashboard visualization (in progress)</span>
             </div>
           </div>
         </div>
